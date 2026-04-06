@@ -1,0 +1,15 @@
+# Aqui aparecen las carpetas y archivos que no quieres subir a GitHub. Por ejemplo:
+
+# Archivos temporales de Python
+__pycache__/
+*.pyc
+
+# Entornos virtuales
+.env
+venv/
+
+# Configuración de VSCode
+.vscode/
+
+# Archivos de sistema de Windows
+Thumbs.db
