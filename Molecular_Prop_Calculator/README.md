@@ -4,24 +4,39 @@
 This project calculates key physicochemical properties of molecules from SMILES.
 
 ## Features
-- Molecular Weight
-- LogP
-- H-bond donors and acceptors
-- TPSA
+- Calculates molecular properties:
+  - Molecular Weight
+  - LogP
+  - H-Bond Donors
+  - H-Bond Acceptors
+  - TPSA (Topological Polar Surface Area)
+  - Rotatable Bonds
+- Accepts SMILES input from:
+  - Command line
+  - CSV or Excel file with a `SMILES` column
+- Generates an Excel file with the calculated properties.
+
+## Requirements
+
+Python 3.9+ and the following libraries:
+rdkit-pypi
+pandas
+openpyxl
 
 ## Usage
 
-Run: 
-python main.py
-
-Input a SMILES string when prompted, for example: `CCO´
-
-Output:
-Molecular Weight: 46.07
-LogP: -0.00
-H-Bond Donors: 1
-H-Bond Acceptors: 1
-TPSA: 20.23
+- Using SMILES directly:
+    python calc_properties.py --smiles "CCO,CC(=O)O,Nc1ccccc1"
+    Calculates properties for ethanol, acetic acid, and aniline.
+    Saves results to properties_output.xlsx by default.
+- Using a CSV or excel file:
+    Example file molecules.csv
+    python calc_properties.py --input_file molecules.csv --output_file results.xlsx
+    The script will read SMILES from the file and save the results to results.xlsx.
+- Without arguments
+    python calc_properties.py
+    The script will prompt you to enter a SMILES string manually.
+    Example input: CCO
 
 ## Why this matters
 
