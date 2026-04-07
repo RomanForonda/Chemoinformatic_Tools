@@ -18,6 +18,7 @@ def calculate_properties(smiles_list):
         else:
             props = {
                 "SMILES": smiles,
+                ""
                 "Molecular Weight": Descriptors.MolWt(mol),
                 "LogP": Descriptors.MolLogP(mol),
                 "H-Bond Donors": Descriptors.NumHDonors(mol),
