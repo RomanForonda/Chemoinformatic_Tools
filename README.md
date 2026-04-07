@@ -1,6 +1,6 @@
 # Chemoinformatic Tools
 
-Repository with chemoinformatic tools for beginers:
+Repository with chemoinformatic tools for beginers
 
 ## Proyects
 
@@ -9,4 +9,12 @@ Repository with chemoinformatic tools for beginers:
 - molecular similarity & clustering
 - mini ADME pipeline
 - LC-MS analysis
-- simple molecule generator 
+- simple molecule generator
+
+## Author
+
+Developed as a beginner-friendly chemoinformatics tool using RDKit.
+
+## License
+
+Free to use for academic and personal projects.
