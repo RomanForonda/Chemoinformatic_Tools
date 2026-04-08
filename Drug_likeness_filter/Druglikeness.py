@@ -1,6 +1,6 @@
 from rdkit import Chem
-from rdkit.Chem import Descriptors, rdMolDescriptors, FilterCatalog
-from rdkit.Chem.FilterCatalog import FilterCatalogParams
+from rdkit.Chem import Descriptors
+from rdkit.Chem.FilterCatalog import FilterCatalog, FilterCatalogParams
 import pandas as pd
 import argparse
 import os
@@ -37,22 +37,36 @@ def veber_filter(props):
     return props["RotatableBonds"] <= 10 and props["TPSA"] <= 140
 
 # ----------------------------------------
-# Filtros PAINS y Brenk usando RDKit FilterCatalog
+# Filtros PAINS y Brenk
 # ----------------------------------------
-def create_filter_catalog():
-    params = FilterCatalogParams()
-    params.AddCatalog(FilterCatalogParams.FilterCatalogs.PAINS_A)
-    params.AddCatalog(FilterCatalogParams.FilterCatalogs.PAINS_B)
-    params.AddCatalog(FilterCatalogParams.FilterCatalogs.PAINS_C)
-    params.AddCatalog(FilterCatalogParams.FilterCatalogs.BRENK)
-    return FilterCatalog.FilterCatalog(params)
+def create_catalogs():
+    params_pains_a = FilterCatalogParams()
+    params_pains_a.AddCatalog(FilterCatalogParams.FilterCatalogs.PAINS_A)
+    pains_a_catalog = FilterCatalog(params_pains_a)
 
-def check_pains_brenk(mol, catalog):
+    params_pains_b = FilterCatalogParams()
+    params_pains_b.AddCatalog(FilterCatalogParams.FilterCatalogs.PAINS_B)
+    pains_b_catalog = FilterCatalog(params_pains_b)
+
+    params_pains_c = FilterCatalogParams()
+    params_pains_c.AddCatalog(FilterCatalogParams.FilterCatalogs.PAINS_C)
+    pains_c_catalog = FilterCatalog(params_pains_c)
+
+    params_brenk = FilterCatalogParams()
+    params_brenk.AddCatalog(FilterCatalogParams.FilterCatalogs.BRENK)
+    brenk_catalog = FilterCatalog(params_brenk)
+
+    return pains_a_catalog, pains_b_catalog, pains_c_catalog, brenk_catalog
+
+def check_pains_brenk(mol, pains_a, pains_b, pains_c, brenk):
     if mol is None:
         return {"PAINS": None, "Brenk": None}
-    matches = catalog.GetMatches(mol)
-    pains_flag = any(f.GetCategory() in ["PAINS A","PAINS B","PAINS C"] for f in matches)
-    brenk_flag = any(f.GetCategory() == "Brenk" for f in matches)
+    pains_flag = (
+        any(pains_a.GetMatches(mol)) or
+        any(pains_b.GetMatches(mol)) or
+        any(pains_c.GetMatches(mol))
+    )
+    brenk_flag = any(brenk.GetMatches(mol))
     return {"PAINS": pains_flag, "Brenk": brenk_flag}
 
 # ----------------------------------------
@@ -77,9 +91,10 @@ def main():
     parser = argparse.ArgumentParser(description="Drug-likeness filter with Lipinski, Veber, PAINS, and Brenk")
     parser.add_argument("--smiles", type=str, help="Single SMILES or comma-separated list")
     parser.add_argument("--input_file", type=str, help="CSV or Excel file with a 'SMILES' column")
-    parser.add_argument("--output_file", type=str, default="drug_likeness_results.csv", help="Output CSV file")
+    parser.add_argument("--output_file", type=str, default="drug_likeness_results", help="Base name for output files")
     args = parser.parse_args()
 
+    # Input
     if args.smiles:
         smiles_list = [s.strip() for s in args.smiles.split(",")]
     elif args.input_file:
@@ -88,9 +103,10 @@ def main():
         smiles = input("Enter SMILES: ")
         smiles_list = [smiles.strip()]
 
-    catalog = create_filter_catalog()
+    pains_a, pains_b, pains_c, brenk = create_catalogs()
     results = []
 
+    # Procesamiento
     for smi in smiles_list:
         props = calculate_properties(smi)
         if props is None:
@@ -101,16 +117,30 @@ def main():
         props["Veber"] = veber_filter(props)
 
         mol = Chem.MolFromSmiles(smi)
-        flags = check_pains_brenk(mol, catalog)
+        flags = check_pains_brenk(mol, pains_a, pains_b, pains_c, brenk)
         props.update(flags)
 
         results.append(props)
 
     df = pd.DataFrame(results)
-    df.to_csv(args.output_file, index=False)
 
-    print(f"\nResults saved to: {args.output_file}\n")
+    # ----------------------------------------
+    # Guardar en CSV + Excel
+    # ----------------------------------------
+    base_name = os.path.splitext(args.output_file)[0]
+
+    csv_file = base_name + ".csv"
+    excel_file = base_name + ".xlsx"
+
+    df.to_csv(csv_file, index=False, sep=";", encoding="utf-8-sig")
+    df.to_excel(excel_file, index=False)
+
+    print(f"\nResults saved to:")
+    print(f"CSV: {csv_file}")
+    print(f"Excel: {excel_file}\n")
+
     print(df)
 
+# ----------------------------------------
 if __name__ == "__main__":
     main()

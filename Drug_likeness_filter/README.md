@@ -14,9 +14,11 @@ This script takes SMILES as input (directly, from a file, or manually), calculat
     - LogP
     - H-Bond Donors (HBD)
     - H-Bond Acceptors (HBA)
-- Applies Lipinski Rule of Five
-- Allows up to 1 violation
-- Exports results to CSV
+    - Total Polar SUrface Area (TPSA)
+    - Rotable bonds
+- Applies Lipinski Rule of Five (Allows up to 1 violation)
+- Applies Veber, PAINS and Brenk filters
+- Exports results to CSV and xlsx
 
 ## Requirements
 
@@ -33,7 +35,7 @@ openpyxl
     Saves results to properties_output.xlsx by default.
 - Using a CSV or excel file:
     Example file molecules.csv
-    python druglikeness.py --input_file molecules.csv --output_file results.xlsx
+    python druglikeness.py --input_file Molecules.xlsx --output_file results
     The script will read SMILES from the file and save the results to results.xlsx.
 - Without arguments
     python druglikeness.py
